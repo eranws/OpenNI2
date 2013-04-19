@@ -67,10 +67,51 @@ private:
 	VideoFrameRef m_frame;
 };
 
-class OpenNIDeviceListener : public OpenNI::DeviceConnectedListener,
-									public OpenNI::DeviceDisconnectedListener,
-									public OpenNI::DeviceStateChangedListener
+class OpenNIDeviceListener :
+	public OpenNI::DeviceConnectedListener,
+	public OpenNI::DeviceDisconnectedListener,
+	public OpenNI::DeviceStateChangedListener
 {
+	Device device;
+	VideoStream depth;
+	PrintCallback depthPrinter;//(depth);
+	openni::Array<openni::DeviceInfo> deviceList;
+	Status rc;
+
+	void openDevice(const DeviceInfo* pInfo)
+	{
+			//open device //? Button?
+			rc = device.open(pInfo->getUri());
+	if (rc != STATUS_OK)
+	{
+		printf("Couldn't open device\n%s\n", OpenNI::getExtendedError());
+		return;
+	}
+
+	//getSensorInfo
+	if (device.getSensorInfo(SENSOR_DEPTH) != NULL)
+	{
+		rc = depth.create(device, SENSOR_DEPTH);
+		if (rc != STATUS_OK)
+		{
+			printf("Couldn't create depth stream\n%s\n", OpenNI::getExtendedError());
+		}
+	}
+
+	//depth start/stop
+	rc = depth.start();
+	if (rc != STATUS_OK)
+	{
+		printf("Couldn't start the depth stream\n%s\n", OpenNI::getExtendedError());
+	}
+
+
+
+	// Register to new frame
+	depth.addNewFrameListener(&depthPrinter);
+	}
+
+
 public:
 
 	OpenNIDeviceListener()
@@ -78,6 +119,13 @@ public:
 		OpenNI::addDeviceConnectedListener(this);
 		OpenNI::addDeviceDisconnectedListener(this);
 		OpenNI::addDeviceStateChangedListener(this);
+
+		openni::OpenNI::enumerateDevices(&deviceList);
+		for (int i = 0; i < deviceList.getSize(); ++i)
+		{
+			printf("Device \"%s\" already connected\n", deviceList[i].getUri());
+			openDevice(&deviceList[i]);
+		}
 	}
 
 	~OpenNIDeviceListener()
@@ -85,6 +133,10 @@ public:
 		OpenNI::removeDeviceConnectedListener(this);
 		OpenNI::removeDeviceDisconnectedListener(this);
 		OpenNI::removeDeviceStateChangedListener(this);
+
+		depth.stop();
+		depth.destroy();
+		device.close();
 	}
 
 	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, DeviceState state) 
@@ -95,11 +147,13 @@ public:
 	virtual void onDeviceConnected(const DeviceInfo* pInfo)
 	{
 		printf("Device \"%s\" connected\n", pInfo->getUri());
+		openDevice(pInfo);
 	}
 
 	virtual void onDeviceDisconnected(const DeviceInfo* pInfo)
 	{
 		printf("Device \"%s\" disconnected\n", pInfo->getUri());
+		//close driver
 	}
 };
 
@@ -114,56 +168,16 @@ int main()
 
 	OpenNIDeviceListener devicePrinter;
 
-
-	openni::Array<openni::DeviceInfo> deviceList;
-	openni::OpenNI::enumerateDevices(&deviceList);
-	for (int i = 0; i < deviceList.getSize(); ++i)
-	{
-		printf("Device \"%s\" already connected\n", deviceList[i].getUri());
-	}
-
-	Device device;
-	rc = device.open(ANY_DEVICE);
-	if (rc != STATUS_OK)
-	{
-		printf("Couldn't open device\n%s\n", OpenNI::getExtendedError());
-		return 2;
-	}
-
-	VideoStream depth;
-
-	if (device.getSensorInfo(SENSOR_DEPTH) != NULL)
-	{
-		rc = depth.create(device, SENSOR_DEPTH);
-		if (rc != STATUS_OK)
-		{
-			printf("Couldn't create depth stream\n%s\n", OpenNI::getExtendedError());
-		}
-	}
-	rc = depth.start();
-	if (rc != STATUS_OK)
-	{
-		printf("Couldn't start the depth stream\n%s\n", OpenNI::getExtendedError());
-	}
-
-
-	PrintCallback depthPrinter;
-
-	// Register to new frame
-	depth.addNewFrameListener(&depthPrinter);
-
 	// Wait while we're getting frames through the printer
 	while (!wasKeyboardHit())
 	{
+		//idle
 		Sleep(100);
 	}
 
-	depth.removeNewFrameListener(&depthPrinter);
+	//!!!!     depth.removeNewFrameListener(&depthPrinter);
 
 
-	depth.stop();
-	depth.destroy();
-	device.close();
 	OpenNI::shutdown();
 
 	return 0;
