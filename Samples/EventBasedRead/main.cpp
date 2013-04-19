@@ -37,12 +37,12 @@ void analyzeFrame(const VideoFrameRef& frame)
 	case PIXEL_FORMAT_DEPTH_1_MM:
 	case PIXEL_FORMAT_DEPTH_100_UM:
 		pDepth = (DepthPixel*)frame.getData();
-		printf("[%08llu] %8d\n", (long long)frame.getTimestamp(),
+		printf("[%08llu] %8d", (long long)frame.getTimestamp(),
 			pDepth[middleIndex]);
 		break;
 	case PIXEL_FORMAT_RGB888:
 		pColor = (RGB888Pixel*)frame.getData();
-		printf("[%08llu] 0x%02x%02x%02x\n", (long long)frame.getTimestamp(),
+		printf("[%08llu] 0x%02x%02x%02x", (long long)frame.getTimestamp(),
 			pColor[middleIndex].r&0xff,
 			pColor[middleIndex].g&0xff,
 			pColor[middleIndex].b&0xff);
@@ -50,6 +50,8 @@ void analyzeFrame(const VideoFrameRef& frame)
 	default:
 		printf("Unknown format\n");
 	}
+
+	printf("\r");
 }
 
 class PrintCallback : public VideoStream::NewFrameListener
