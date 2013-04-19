@@ -78,37 +78,44 @@ class OpenNIDeviceListener :
 	openni::Array<openni::DeviceInfo> deviceList;
 	Status rc;
 
-	void openDevice(const DeviceInfo* pInfo)
+	void openDevice(const DeviceInfo* pInfo) //return device?
 	{
-			//open device //? Button?
-			rc = device.open(pInfo->getUri());
-	if (rc != STATUS_OK)
-	{
-		printf("Couldn't open device\n%s\n", OpenNI::getExtendedError());
-		return;
-	}
-
-	//getSensorInfo
-	if (device.getSensorInfo(SENSOR_DEPTH) != NULL)
-	{
-		rc = depth.create(device, SENSOR_DEPTH);
+		//open device //? Button?
+		rc = device.open(pInfo->getUri());
 		if (rc != STATUS_OK)
 		{
-			printf("Couldn't create depth stream\n%s\n", OpenNI::getExtendedError());
+			printf("Couldn't open device\n%s\n", OpenNI::getExtendedError());
+			return;
 		}
+
+		if (device.getSensorInfo(SENSOR_DEPTH) != NULL)
+		{
+			rc = depth.create(device, SENSOR_DEPTH);
+			if (rc != STATUS_OK)
+			{
+				printf("Couldn't create depth stream\n%s\n", OpenNI::getExtendedError());
+			}
+		}
+
+		//depth start/stop
+		rc = depth.start();
+		if (rc != STATUS_OK)
+		{
+			printf("Couldn't start the depth stream\n%s\n", OpenNI::getExtendedError());
+		}
+
+
+
+		// Register to new frame
+		depth.addNewFrameListener(&depthPrinter);
 	}
 
-	//depth start/stop
-	rc = depth.start();
-	if (rc != STATUS_OK)
+	void closeDevice()
 	{
-		printf("Couldn't start the depth stream\n%s\n", OpenNI::getExtendedError());
-	}
-
-
-
-	// Register to new frame
-	depth.addNewFrameListener(&depthPrinter);
+		depth.removeNewFrameListener(&depthPrinter);
+		depth.stop();
+		depth.destroy();
+		device.close();
 	}
 
 
@@ -120,11 +127,11 @@ public:
 		OpenNI::addDeviceDisconnectedListener(this);
 		OpenNI::addDeviceStateChangedListener(this);
 
-		openni::OpenNI::enumerateDevices(&deviceList);
+		OpenNI::enumerateDevices(&deviceList);
 		for (int i = 0; i < deviceList.getSize(); ++i)
 		{
 			printf("Device \"%s\" already connected\n", deviceList[i].getUri());
-			openDevice(&deviceList[i]);
+			openDevice(&deviceList[i]); //config: openOnStartup
 		}
 	}
 
@@ -134,9 +141,7 @@ public:
 		OpenNI::removeDeviceDisconnectedListener(this);
 		OpenNI::removeDeviceStateChangedListener(this);
 
-		depth.stop();
-		depth.destroy();
-		device.close();
+		closeDevice();
 	}
 
 	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, DeviceState state) 
@@ -153,7 +158,7 @@ public:
 	virtual void onDeviceDisconnected(const DeviceInfo* pInfo)
 	{
 		printf("Device \"%s\" disconnected\n", pInfo->getUri());
-		//close driver
+		closeDevice();
 	}
 };
 
@@ -174,9 +179,6 @@ int main()
 		//idle
 		Sleep(100);
 	}
-
-	//!!!!     depth.removeNewFrameListener(&depthPrinter);
-
 
 	OpenNI::shutdown();
 
