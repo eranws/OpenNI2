@@ -70,6 +70,21 @@ class OpenNIDeviceListener : public OpenNI::DeviceConnectedListener,
 									public OpenNI::DeviceStateChangedListener
 {
 public:
+
+	OpenNIDeviceListener()
+	{
+		OpenNI::addDeviceConnectedListener(this);
+		OpenNI::addDeviceDisconnectedListener(this);
+		OpenNI::addDeviceStateChangedListener(this);
+	}
+
+	~OpenNIDeviceListener()
+	{
+		OpenNI::removeDeviceConnectedListener(this);
+		OpenNI::removeDeviceDisconnectedListener(this);
+		OpenNI::removeDeviceStateChangedListener(this);
+	}
+
 	virtual void onDeviceStateChanged(const DeviceInfo* pInfo, DeviceState state) 
 	{
 		printf("Device \"%s\" error state changed to %d\n", pInfo->getUri(), state);
@@ -97,9 +112,6 @@ int main()
 
 	OpenNIDeviceListener devicePrinter;
 
-	OpenNI::addDeviceConnectedListener(&devicePrinter);
-	OpenNI::addDeviceDisconnectedListener(&devicePrinter);
-	OpenNI::addDeviceStateChangedListener(&devicePrinter);
 
 	openni::Array<openni::DeviceInfo> deviceList;
 	openni::OpenNI::enumerateDevices(&deviceList);
