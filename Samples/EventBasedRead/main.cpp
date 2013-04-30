@@ -162,8 +162,11 @@ public:
 	}
 };
 
-int main()
+int main(int , char* argv[])
 {
+	printf(*argv);
+	printf("\nWaiting for connection");
+
 	Status rc = OpenNI::initialize();
 	if (rc != STATUS_OK)
 	{
