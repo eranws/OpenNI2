@@ -162,8 +162,39 @@ public:
 	}
 };
 
-int main(int , char* argv[])
+#include "CImg.h"
+using namespace cimg_library;
+
+// Main procedure
+//----------------
+int mainCImg(int argc,char **argv) {
+
+	// Read command line argument.
+	cimg_usage("Simple plotter of mathematical formulas");
+	const char *const formula = cimg_option("-f","sin(x/8) % cos(2*x)","Formula to plot");
+	const float x0 = cimg_option("-x0",-5.0f,"Minimal X-value");
+	const float x1 = cimg_option("-x1",5.0f,"Maximal X-value");
+	const int resolution = cimg_option("-r",1024,"Plot resolution");
+	const unsigned int nresolution = resolution>1?resolution:1024;
+	const unsigned int plot_type = cimg_option("-p",1,"Plot type");
+	const unsigned int vertex_type = cimg_option("-v",1,"Vertex type");
+
+	// Create plot data.
+	CImg<double> values(nresolution);
+	values.eval(formula);
+	const unsigned int r = nresolution-1;
+	cimg_forX(values,X) values(X) = values.eval(0,x0+X*(x1-x0)/r);
+
+	// Display interactive plot window.
+	values.display_graph(formula,plot_type,vertex_type,"X-axis",x0,x1,"Y-axis");
+
+	// Quit.
+	return 0;
+}
+
+int main(int argc, char* argv[])
 {
+	mainCImg(argc, argv);
 	printf(*argv);
 	printf("\nWaiting for connection");
 
