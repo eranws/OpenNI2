@@ -161,8 +161,9 @@ public:
 		closeDevice();
 	}
 };
-
+#pragma warning( push, 1 )
 #include "CImg.h"
+#pragma warning (pop)
 using namespace cimg_library;
 
 // Main procedure
