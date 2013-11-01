@@ -20,3 +20,6 @@ Redist/Final
 Redist/compile.log
 Redist/OpenNI-*
 Source/Documentation/html
+
+UpgradeLog.*
+_UpgradeReport_Files/
