@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include "OpenNI.h"
 
-#include "OniSampleUtilities.h"
-
 using namespace openni;
 
 void analyzeFrame(const VideoFrameRef& frame)
@@ -137,13 +135,6 @@ int main()
 
 	// Register to new frame
 	depth.addNewFrameListener(&depthPrinter);
-
-	// Wait while we're getting frames through the printer
-	while (!wasKeyboardHit())
-	{
-		Sleep(100);
-	}
-
 	depth.removeNewFrameListener(&depthPrinter);
 
 
