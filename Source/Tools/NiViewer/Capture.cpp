@@ -26,6 +26,8 @@
 #include "Device.h"
 #include "Draw.h"
 
+#include "BmpHelper.h"
+
 #if (XN_PLATFORM == XN_PLATFORM_WIN32)
 #include <Commdlg.h>
 #endif
@@ -418,12 +420,14 @@ void captureSingleFrame(int)
 	if (colorFrame.isValid())
 	{
 		xnOSSaveFile(csColorFileName, colorFrame.getData(), colorFrame.getDataSize());
+		saveBmp(csColorFileName, colorFrame.getData(), colorFrame.getDataSize(), false);
 	}
 
 	openni::VideoFrameRef& depthFrame = getDepthFrame();
 	if (depthFrame.isValid())
 	{
 		xnOSSaveFile(csDepthFileName, depthFrame.getData(), depthFrame.getDataSize());
+		saveBmp(csDepthFileName, depthFrame.getData(), depthFrame.getDataSize(), true);
 	}
 
 	openni::VideoFrameRef& irFrame = getIRFrame();

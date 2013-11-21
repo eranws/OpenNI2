@@ -180,6 +180,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BmpHelper.cpp" />
     <ClCompile Include="Capture.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Draw.cpp" />
@@ -189,6 +190,7 @@
     <ClCompile Include="NiViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BmpHelper.h" />
     <ClInclude Include="Capture.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Draw.h" />
