@@ -135,6 +135,15 @@ int main()
 
 	// Register to new frame
 	depth.addNewFrameListener(&depthPrinter);
+	
+
+	int i = 1;
+	while(i > 0)
+	{
+		scanf_s("%d", i);
+		printf("%d\n", i);
+	}
+
 	depth.removeNewFrameListener(&depthPrinter);
 
 
